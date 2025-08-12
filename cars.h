@@ -1,5 +1,5 @@
-#ifndef STRUCTURES_H
-#define STRUCTURES_H
+#ifndef CARS_H
+#define CARS_H
 
 typedef struct {
   int pos[2];
@@ -12,14 +12,6 @@ typedef struct {
   int size;
   int capacity;
 } ArrayList;
-
-typedef struct {
-  int total[4];
-} Semaphore;
-
-typedef struct {
-  int** grid;
-} Intersection;
 
 ArrayList* createArrayList(int initialCapacity);
 void insert(ArrayList* arr, Car value);

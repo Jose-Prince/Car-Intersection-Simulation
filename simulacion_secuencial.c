@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "structures.h"
+#include "cars.h"
 
 int main() {
   ArrayList* cars = createArrayList(1);
