@@ -18,13 +18,29 @@ int main(int argc, char *argv[]) {
   Semaphore* semaphores = initializeSemaphore();
   Intersection* intersection = initializeIntersection(size);
 
+  enterCars(intersection, cars);
+  printIntersectionGrid(intersection);
+  for (int i = 0; i < cars->size; i++) {
+      Car car = cars->data[i];
+      printf("x%d: %d, y%d: %d\n", i, car.pos[0], i, car.pos[1]);
+    }
+  sleep(2);
+
   for (int i = 0; i < ticks; i++) {
-    printIntersectionGrid(intersection, size);
+    enterCars(intersection, cars);
+    for (int i = 0; i < cars->size; i++) {
+      move(&cars->data[i], intersection);
+    }
+    printIntersectionGrid(intersection);
+    for (int i = 0; i < cars->size; i++) {
+      Car car = cars->data[i];
+      printf("x%d: %d, y%d: %d\n", i, car.pos[0], i, car.pos[1]);
+    }
     sleep(2);
   }
 
-  printf("Hello World");
-
+  printIntersectionGrid(intersection);
+ 
   freeArrayList(cars);
   freeIntersection(intersection, size);
   return 0;
