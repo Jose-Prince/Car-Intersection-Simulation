@@ -22,19 +22,22 @@ int main(int argc, char *argv[]) {
   printIntersectionGrid(intersection);
   for (int i = 0; i < cars->size; i++) {
       Car car = cars->data[i];
+
       printf("x%d: %d, y%d: %d\n", i, car.pos[0], i, car.pos[1]);
     }
   sleep(2);
 
   for (int i = 0; i < ticks; i++) {
+    printf("TICK: %d\n", i);
+    changeState(i, semaphores);
     enterCars(intersection, cars);
     for (int i = 0; i < cars->size; i++) {
-      move(&cars->data[i], intersection);
+      move(&cars->data[i], intersection, semaphores, cars);
     }
     printIntersectionGrid(intersection);
     for (int i = 0; i < cars->size; i++) {
       Car car = cars->data[i];
-      printf("x%d: %d, y%d: %d\n", i, car.pos[0], i, car.pos[1]);
+      printf("x%d: %d, y%d: %d, targetX: %d, targetY: %d, mode:%d, initial lane: %d, advance: %d\n", i, car.pos[0], i, car.pos[1], car.target[0], car.target[1], car.mode, car.initialLane, car.advance);
     }
     sleep(2);
   }
