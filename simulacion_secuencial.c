@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     changeState(i, semaphores);
     enterCars(intersection, cars);
     for (int i = 0; i < cars->size; i++) {
-      move(&cars->data[i], intersection, semaphores, cars);
+      move(&cars->data[i], intersection, semaphores, cars, i);
     }
     printIntersectionGrid(intersection);
     for (int i = 0; i < cars->size; i++) {

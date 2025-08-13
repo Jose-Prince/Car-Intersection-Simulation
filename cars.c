@@ -148,7 +148,7 @@ void enterCars(Intersection* intersection, ArrayList* arr) {
     }
 }
 
-void move(Car* car, Intersection* intersection, Semaphore* semaphores, ArrayList* arr) {
+void move(Car* car, Intersection* intersection, Semaphore* semaphores, ArrayList* arr, int tick) {
   int x = car->pos[0]; // fila
   int y = car->pos[1]; // columna
     
@@ -159,10 +159,22 @@ void move(Car* car, Intersection* intersection, Semaphore* semaphores, ArrayList
   else if (car->initialLane == 7) laneIndex = 3;
   else return;
 
+  int alreadyCrossed = 0;
+  if (car->initialLane == 1 && x > intersection->size / 2 + intersection->size / 4) alreadyCrossed = 1;
+  if (car->initialLane == 3 && y < intersection->size / 2 + intersection->size / 4) alreadyCrossed = 1;
+  if (car->initialLane == 5 && x < intersection->size / 2 + intersection->size / 4) alreadyCrossed = 1;
+  if (car->initialLane == 7 && y > intersection->size / 2 + intersection->size / 4) alreadyCrossed = 1;
+
   int allowed = 0;
-  if (car->mode == STRAIGHT && semaphores[laneIndex].stateStraight == GREEN) allowed = 1;
-  if (car->mode == RIGHT && semaphores[laneIndex].stateRight == GREEN) allowed = 1;
-  if (car->mode == LEFT && semaphores[laneIndex].stateLeft == GREEN) allowed = 1;
+  if (car->advance == 2 && tick % 12 < 7) {
+    allowed = 1;
+  } else if (alreadyCrossed) {
+    allowed = 1;
+  } else {
+    if (car->mode == STRAIGHT && semaphores[laneIndex].stateStraight == GREEN) allowed = 1;
+    if (car->mode == RIGHT && semaphores[laneIndex].stateRight == GREEN) allowed = 1;
+    if (car->mode == LEFT && semaphores[laneIndex].stateLeft == GREEN) allowed = 1;
+  }
   
   if (!allowed) {
     return;
@@ -249,4 +261,3 @@ void determineTarget(Car* car, Intersection* intersection) {
   car->target[0] = targets[lane_index][car->mode][0];
   car->target[1] = targets[lane_index][car->mode][1];
 }
-

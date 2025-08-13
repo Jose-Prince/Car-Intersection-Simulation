@@ -1,5 +1,4 @@
 #include "intersection.h"
-#include "cars.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,7 +87,7 @@ void freeIntersection(Intersection* intersection, int size) {
 }
 
 void printIntersectionGrid(Intersection* intersection) {
-  //system("clear");
+  system("clear");
   for (int i = 0; i < intersection->size; i++) {
     for (int j = 0; j < intersection->size; j++) {
       printf("%c ", intersection->grid[i][j]);

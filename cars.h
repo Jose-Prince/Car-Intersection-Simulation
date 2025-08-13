@@ -25,6 +25,6 @@ void removeAt(ArrayList* arr, int index);
 void removeAtPosition(ArrayList* arr, int x, int y);
 void freeArrayList(ArrayList* arr);
 void enterCars(Intersection* intersection, ArrayList* arr);
-void move(Car* car, Intersection* intersection, Semaphore* semaphores, ArrayList* arr);
+void move(Car* car, Intersection* intersection, Semaphore* semaphores, ArrayList* arr, int tick);
 
 #endif
