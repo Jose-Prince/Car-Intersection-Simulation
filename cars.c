@@ -2,15 +2,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <omp.h>
+#include <time.h>
 #include "intersection.h"
-
-static const size_t STRAIGHT = 0;
-static const size_t RIGHT = 1;
-static const size_t LEFT = 2;
-
-static const size_t GREEN = 0;
-static const size_t YELLOW = 1;
-static const size_t RED = 2;
 
 double generateVelocity();
 void determineTarget(Car* car, Intersection* intersection);
@@ -77,76 +71,101 @@ void freeArrayList(ArrayList *arr) {
 void enterCars(Intersection* intersection, ArrayList* arr) {
     int lane1 = 2;
     int lane2 = intersection->size - 3;
-    int mid = intersection->size / 2;
+    int mid   = intersection->size / 2;
+    
+    int size = intersection->size;
 
-    // Carros entrando desde arriba (verticales)
-    for (int j = 0; j < intersection->size; j++) {
-        if (j > lane1 && j < mid && (rand() % 100 > 90) && intersection->grid[0][j] != 'O') {
-            intersection->grid[0][j] = 'O'; // primera fila
-            Car newCar;
-            newCar.mode = STRAIGHT;
-            newCar.pos[0] = 0;
-            newCar.pos[1] = j;
-            newCar.velocity = generateVelocity();
-            newCar.initialLane = 1;
-            newCar.target[0] = 0;
-            newCar.target[1] = 0;
-            newCar.advance = 0;
-            insert(arr, newCar);
+    Car* newCars = malloc(sizeof(Car) * 4 * size);
+    int newCount = 0;
+
+    #pragma omp parallel
+    {
+        Car threadCars[size];
+        int threadCount = 0;
+
+        unsigned int seed = time(NULL) ^ omp_get_thread_num();
+
+        #pragma omp for nowait
+        for (int j = 0; j < size; j++) {
+            if (j > lane1 && j < mid && (rand_r(&seed) % 100 > 90) && intersection->grid[0][j] != 'O') {
+                Car newCar;
+                newCar.mode = STRAIGHT;
+                newCar.pos[0] = 0;
+                newCar.pos[1] = j;
+                newCar.velocity = generateVelocity();
+                newCar.initialLane = 1;
+                newCar.target[0] = 0;
+                newCar.target[1] = 0;
+                newCar.advance = 0;
+                threadCars[threadCount++] = newCar;
+            }
+        }
+
+        #pragma omp for nowait
+        for (int j = 0; j < size; j++) {
+            if (j < lane2 && j > mid && (rand_r(&seed) % 100 > 50) && intersection->grid[size - 1][j] != 'O') {
+                Car newCar;
+                newCar.mode = STRAIGHT;
+                newCar.pos[0] = size - 1;
+                newCar.pos[1] = j;
+                newCar.velocity = generateVelocity();
+                newCar.initialLane = 5;
+                newCar.target[0] = 0;
+                newCar.target[1] = 0;
+                newCar.advance = 0;
+                threadCars[threadCount++] = newCar;
+            }
+        }
+
+        #pragma omp for nowait
+        for (int i = 0; i < size; i++) {
+            if (i < lane2 && i > mid && (rand_r(&seed) % 100 > 50) && intersection->grid[i][0] != 'O') {
+                Car newCar;
+                newCar.mode = STRAIGHT;
+                newCar.pos[0] = i;
+                newCar.pos[1] = 0;
+                newCar.velocity = generateVelocity();
+                newCar.initialLane = 7;
+                newCar.target[0] = 0;
+                newCar.target[1] = 0;
+                newCar.advance = 0;
+                threadCars[threadCount++] = newCar;
+            }
+        }
+
+        #pragma omp for nowait
+        for (int i = 0; i < size; i++) {
+            if (i > lane1 && i < mid && (rand_r(&seed) % 100 > 50) && intersection->grid[i][size - 1] != 'O') {
+                Car newCar;
+                newCar.mode = STRAIGHT;
+                newCar.pos[0] = i;
+                newCar.pos[1] = size - 1;
+                newCar.velocity = generateVelocity();
+                newCar.initialLane = 3;
+                newCar.target[0] = 0;
+                newCar.target[1] = 0;
+                newCar.advance = 0;
+                threadCars[threadCount++] = newCar;
+            }
+        }
+
+        #pragma omp critical
+        {
+            for (int k = 0; k < threadCount; k++) {
+                newCars[newCount++] = threadCars[k];
+            }
         }
     }
 
-    // Carros entrando desde abajo (verticales)
-    for (int j = 0; j < intersection->size; j++) {
-        if (j < lane2 && j > mid && (rand() % 100 > 50) && intersection->grid[intersection->size - 1][j] != 'O') {
-            intersection->grid[intersection->size - 1][j] = 'O'; // última fila
-            Car newCar;
-            newCar.mode = STRAIGHT;
-            newCar.pos[0] = intersection->size - 1;
-            newCar.pos[1] = j;
-            newCar.velocity = generateVelocity();
-            newCar.initialLane = 5;
-            newCar.target[0] = 0;
-            newCar.target[1] = 0;
-            newCar.advance = 0;
-            insert(arr, newCar);
-        }
+    for (int i = 0; i < newCount; i++) {
+        Car c = newCars[i];
+        insert(arr, c);
+        intersection->grid[c.pos[0]][c.pos[1]] = 'O';
     }
 
-    // Carros entrando desde la izquierda (horizontales)
-    for (int i = 0; i < intersection->size; i++) {
-        if (i < lane2 && i > mid && (rand() % 100 > 50) && intersection->grid[i][0] != 'O') {
-            intersection->grid[i][0] = 'O'; // primera columna
-            Car newCar;
-            newCar.mode = STRAIGHT;
-            newCar.pos[0] = i;
-            newCar.pos[1] = 0;
-            newCar.velocity = generateVelocity();
-            newCar.initialLane = 7;
-            newCar.target[0] = 0;
-            newCar.target[1] = 0;
-            newCar.advance = 0;
-            insert(arr, newCar);
-        }
-    }
-
-    // Carros entrando desde la derecha (horizontales)
-    for (int i = 0; i < intersection->size; i++) {
-        if (i > lane1 && i < mid && (rand() % 100 > 50) && intersection->grid[i][intersection->size - 1] != 'O') {
-            intersection->grid[i][intersection->size - 1] = 'O'; // última columna
-            Car newCar;
-            newCar.mode = STRAIGHT;
-            newCar.pos[0] = i;
-            newCar.pos[1] = intersection->size - 1;
-            newCar.velocity = generateVelocity();
-            newCar.initialLane = 3;
-            newCar.target[0] = 0;
-            newCar.target[1] = 0;
-            newCar.advance = 0;
-            insert(arr, newCar);
-        }
-    }
+    free(newCars);
 }
+
 
 void move(Car* car, Intersection* intersection, Semaphore* semaphores, ArrayList* arr, int tick) {
   int x = car->pos[0]; // fila

@@ -21,6 +21,7 @@ Intersection* initializeIntersection(int size) {
     int start = (size - innerSize) / 2;
     int end = start + innerSize - 1;
 
+    #pragma omp parallel for
     for (int i = 0; i < size; i++) {
         intersection->grid[i] = malloc(size * sizeof(char));
         for (int j = 0; j < size; j++) {
@@ -39,6 +40,7 @@ Intersection* initializeIntersection(int size) {
         }
     }
 
+    #pragma omp parallel for
     for (int i = 0; i < size; i++) {
         int lastPlus = -1;
         for (int j = 0; j < size; j++) {
@@ -87,7 +89,7 @@ void freeIntersection(Intersection* intersection, int size) {
 }
 
 void printIntersectionGrid(Intersection* intersection) {
-  system("clear");
+  //system("clear");
   for (int i = 0; i < intersection->size; i++) {
     for (int j = 0; j < intersection->size; j++) {
       printf("%c ", intersection->grid[i][j]);

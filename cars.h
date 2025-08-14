@@ -3,6 +3,15 @@
 
 #include "intersection.h"
 #include "semaphore.h"
+#include <stddef.h>
+
+static const size_t STRAIGHT = 0;
+static const size_t RIGHT = 1;
+static const size_t LEFT = 2;
+
+static const size_t GREEN = 0;
+static const size_t YELLOW = 1;
+static const size_t RED = 2;
 
 typedef struct {
   int pos[2];
